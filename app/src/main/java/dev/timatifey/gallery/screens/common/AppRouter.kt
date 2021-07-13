@@ -1,32 +1,30 @@
 package dev.timatifey.gallery.screens.common
 
+import android.os.Bundle
 import androidx.fragment.app.FragmentManager
 import dev.timatifey.gallery.R
 import dev.timatifey.gallery.screens.photos.PhotosFragment
 import dev.timatifey.gallery.screens.users.UsersFragment
-import dev.timatifey.gallery.utils.SingletonHolder
 
 interface IAppRouter {
-    fun initialize()
-    fun navigateUp()
-    fun toUserPhotosFragment(albumId: Int)
+    fun initialize(outState: Bundle?)
+    fun toUserPhotosFragment(userId: Int)
 }
 
 class AppRouter(private val fragmentManager: FragmentManager) : IAppRouter {
 
-    override fun initialize() {
-        fragmentManager.beginTransaction()
-            .replace(R.id.activity_main__container, UsersFragment.newInstance())
-            .commit()
+    override fun initialize(outState: Bundle?) {
+        if (outState == null) {
+            fragmentManager.beginTransaction().apply {
+                add(R.id.activity_main__container, UsersFragment.newInstance())
+                commit()
+            }
+        }
     }
 
-    override fun navigateUp() {
-        fragmentManager.popBackStack()
-    }
-
-    override fun toUserPhotosFragment(albumId: Int) {
+    override fun toUserPhotosFragment(userId: Int) {
         fragmentManager.beginTransaction()
-            .replace(R.id.activity_main__container, PhotosFragment.newInstance(albumId))
+            .replace(R.id.activity_main__container, PhotosFragment.newInstance(userId))
             .addToBackStack(null)
             .commit()
     }

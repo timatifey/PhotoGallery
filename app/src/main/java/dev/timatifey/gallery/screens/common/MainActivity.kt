@@ -24,7 +24,7 @@ class MainActivity : BaseActivity(), ToolbarController {
         backButton.setOnClickListener {
             onBackPressed()
         }
-        appRouter.initialize()
+        appRouter.initialize(savedInstanceState)
     }
 
     override fun setTitle(title: String) {

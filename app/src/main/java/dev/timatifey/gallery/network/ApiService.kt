@@ -1,7 +1,5 @@
 package dev.timatifey.gallery.network
 
-import dev.timatifey.gallery.data.Photo
-import dev.timatifey.gallery.data.User
 import dev.timatifey.gallery.utils.SingletonHolder
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -41,7 +39,7 @@ class ApiService(
         }
 
     override suspend fun getAlbumsByUserId(userId: Int): List<Int> =
-        downloadAndParse("$BASE_URL/album?userId=$userId") { json ->
+        downloadAndParse("$BASE_URL/albums?userId=$userId") { json ->
             json.getInt("id")
         }
 

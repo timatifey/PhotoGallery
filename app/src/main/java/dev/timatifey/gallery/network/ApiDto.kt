@@ -1,4 +1,4 @@
-package dev.timatifey.gallery.data
+package dev.timatifey.gallery.network
 
 data class User(
     val id: Int,

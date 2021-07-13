@@ -1,18 +1,17 @@
 package dev.timatifey.gallery.screens.users
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import dev.timatifey.gallery.R
-import dev.timatifey.gallery.data.User
+import dev.timatifey.gallery.network.User
 
 class UsersAdapter(private val listener: Listener) :
     RecyclerView.Adapter<UsersAdapter.UserViewHolder>() {
 
-    private var userList: MutableList<User> = mutableListOf()
+    private var userList: List<User> = emptyList()
 
     class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val userName: TextView = itemView.findViewById(R.id.item_user__name)
@@ -38,9 +37,8 @@ class UsersAdapter(private val listener: Listener) :
         return userList.size
     }
 
-    fun addAll(users: List<User>) {
-        userList.addAll(users)
-        notifyDataSetChanged()
+    fun bindData(users: List<User>) {
+        userList = users
     }
 
     interface Listener {

@@ -4,32 +4,43 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.Toolbar
+import android.widget.ProgressBar
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import dev.timatifey.gallery.R
-import dev.timatifey.gallery.data.User
+import dev.timatifey.gallery.network.User
+import dev.timatifey.gallery.interactors.UsersInteractor
+import dev.timatifey.gallery.repositories.UsersInMemoryRepository
 import dev.timatifey.gallery.screens.common.base.BaseFragment
+import dev.timatifey.gallery.viewmodels.UsersViewModel
+import dev.timatifey.gallery.viewmodels.UsersViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlin.random.Random
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class UsersFragment : BaseFragment(), UsersAdapter.Listener {
 
-    lateinit var recyclerView: RecyclerView
-    lateinit var usersAdapter: UsersAdapter
+    private val usersViewModelFactory =
+        UsersViewModelFactory(UsersInteractor(UsersInMemoryRepository, apiService))
+    private val usersViewModel: UsersViewModel =
+        usersViewModelFactory.create(UsersViewModel::class.java)
+
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var usersAdapter: UsersAdapter
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_users, container, false)
-        return view
+        return inflater.inflate(R.layout.fragment_users, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -43,15 +54,43 @@ class UsersFragment : BaseFragment(), UsersAdapter.Listener {
             val dividerItemDecoration = DividerItemDecoration(context, LinearLayoutManager.VERTICAL)
             addItemDecoration(dividerItemDecoration)
         }
+        progressBar = view.findViewById(R.id.fragment_users__progress_bar)
 
-        CoroutineScope(Dispatchers.Main).launch {
-            usersAdapter.addAll(apiService.getUsers())
-        }
+        usersViewModel.state.onEach {
+            when (it) {
+                is UsersViewModel.State.Loading -> {
+                    progressBar.isVisible = true
+                    recyclerView.isVisible = false
+                }
+                is UsersViewModel.State.Error -> {
+                    progressBar.isVisible = false
+                    recyclerView.isVisible = true
+                    Snackbar.make(
+                        requireView(),
+                        getString(it.errorMessageId),
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                }
+                is UsersViewModel.State.Success -> {
+                    progressBar.isVisible = false
+                    recyclerView.isVisible = true
+                    usersAdapter.bindData(it.users)
+                    usersAdapter.notifyDataSetChanged()
+                }
+            }
+        }.launchIn(usersViewModel.coroutineScope)
 
         toolbarController.apply {
             setTitle("Users")
             setupBack("", false)
         }
+
+        usersViewModel.fetchUsers()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        usersViewModel.onDestroy()
     }
 
     companion object {
@@ -63,27 +102,4 @@ class UsersFragment : BaseFragment(), UsersAdapter.Listener {
         appRouter.toUserPhotosFragment(user.id)
     }
 
-}
-
-fun generateUsers(): List<User> {
-    val l = mutableListOf<User>()
-    for (i in 1..20) {
-        l.add(
-            User(
-                i, randomWord(30)
-            )
-        )
-    }
-    return l
-}
-
-private fun randomWord(wordLength: Long): String {
-    val source = "abcdefghijklmnopqrstuvwxyz"
-    val list = mutableListOf<Int>()
-    for (i in 0 until wordLength) {
-        list.add(Random.nextInt(0, source.length))
-    }
-    return list.asSequence()
-        .map(source::get)
-        .joinToString("")
 }

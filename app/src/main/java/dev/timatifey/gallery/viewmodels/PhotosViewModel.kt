@@ -2,13 +2,13 @@ package dev.timatifey.gallery.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import dev.timatifey.gallery.network.User
-import dev.timatifey.gallery.interactors.UsersInteractor
+import dev.timatifey.gallery.interactors.PhotosInteractor
+import dev.timatifey.gallery.network.Photo
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
-class UsersViewModel(
-    private val usersInteractor: UsersInteractor
+class PhotosViewModel(
+    private val photosInteractor: PhotosInteractor,
 ) : ViewModel() {
     val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
@@ -16,7 +16,7 @@ class UsersViewModel(
     val state: StateFlow<State> = _state.asStateFlow()
 
     sealed class State {
-        data class Success(val users: List<User>) : State()
+        data class Success(val photos: List<Photo>) : State()
         data class Error(val errorMessageId: Int) : State()
         object Loading : State()
     }
@@ -25,23 +25,24 @@ class UsersViewModel(
         coroutineScope.coroutineContext.cancelChildren()
     }
 
-    fun fetchUsers() {
+    fun fetchPhotos(userId: Int) {
         coroutineScope.launch {
-            usersInteractor.getUsers()
+            photosInteractor.getPhotosByUserId(userId)
                 .flowOn(Dispatchers.Main)
                 .collect {
                     _state.value = State.Success(it)
                 }
-
         }
     }
 }
 
-class UsersViewModelFactory(private val usersInteractor: UsersInteractor) :
-    ViewModelProvider.Factory {
+class PhotosViewModelFactory(
+    private val photosInteractor: PhotosInteractor
+) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return modelClass.getConstructor(UsersInteractor::class.java).newInstance(usersInteractor)
+        return modelClass.getConstructor(PhotosInteractor::class.java)
+            .newInstance(photosInteractor)
     }
 
 }
