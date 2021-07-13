@@ -1,5 +1,6 @@
 package dev.timatifey.gallery.network
 
+import android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET
 import dev.timatifey.gallery.utils.SingletonHolder
 import kotlinx.coroutines.withContext
 import org.json.JSONArray

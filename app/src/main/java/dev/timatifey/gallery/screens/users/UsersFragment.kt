@@ -15,6 +15,7 @@ import dev.timatifey.gallery.R
 import dev.timatifey.gallery.network.User
 import dev.timatifey.gallery.interactors.UsersInteractor
 import dev.timatifey.gallery.repositories.UsersInMemoryRepository
+import dev.timatifey.gallery.screens.common.MainActivity
 import dev.timatifey.gallery.screens.common.base.BaseFragment
 import dev.timatifey.gallery.viewmodels.UsersViewModel
 import dev.timatifey.gallery.viewmodels.UsersViewModelFactory
@@ -99,7 +100,11 @@ class UsersFragment : BaseFragment(), UsersAdapter.Listener {
     }
 
     override fun onUserItemClicked(user: User) {
-        appRouter.toUserPhotosFragment(user.id)
+        if (hasConnection()) {
+            appRouter.toUserPhotosFragment(user.id)
+        } else {
+            (activity as MainActivity).tryInit(Bundle())
+        }
     }
 
 }

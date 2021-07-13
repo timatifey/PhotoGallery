@@ -12,11 +12,15 @@ interface IAppRouter {
 }
 
 class AppRouter(private val fragmentManager: FragmentManager) : IAppRouter {
+    companion object {
+        const val USERS_TAG = "UsersFragmentTAG"
+        const val PHOTOS_TAG = "PhotosFragmentTAG"
+    }
 
     override fun initialize(outState: Bundle?) {
         if (outState == null) {
             fragmentManager.beginTransaction().apply {
-                add(R.id.activity_main__container, UsersFragment.newInstance())
+                add(R.id.activity_main__container, UsersFragment.newInstance(), USERS_TAG)
                 commit()
             }
         }
@@ -24,9 +28,8 @@ class AppRouter(private val fragmentManager: FragmentManager) : IAppRouter {
 
     override fun toUserPhotosFragment(userId: Int) {
         fragmentManager.beginTransaction()
-            .replace(R.id.activity_main__container, PhotosFragment.newInstance(userId))
+            .replace(R.id.activity_main__container, PhotosFragment.newInstance(userId), PHOTOS_TAG)
             .addToBackStack(null)
             .commit()
     }
-
 }
