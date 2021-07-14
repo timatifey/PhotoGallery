@@ -8,7 +8,7 @@
 
 ## Architecture
 <p align="center">
-<img src="assets/arch.png"  width="75%">
+<img src="assets/arch.png"  width="100%">
 </p>
 
 ## Stack
@@ -16,6 +16,4 @@
 * [Coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 
 ## Preview
-<p align="center">
 <img src="assets/screen.gif" width="40%">
-</p>
